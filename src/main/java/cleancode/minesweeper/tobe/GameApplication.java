@@ -2,7 +2,6 @@ package cleancode.minesweeper.tobe;
 
 import cleancode.minesweeper.tobe.gamelevel.Advanced;
 import cleancode.minesweeper.tobe.gamelevel.GameLevel;
-import cleancode.minesweeper.tobe.gamelevel.Middle;
 
 public class GameApplication {
 
