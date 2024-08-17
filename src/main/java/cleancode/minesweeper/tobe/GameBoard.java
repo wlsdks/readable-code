@@ -24,7 +24,7 @@ public class GameBoard {
     }
 
     public void openSurroundedCells(int row, int col) {
-        if (row < 0 || row >= getRowSize() || col < 0 || col >= getColumnSize()) {
+        if (row < 0 || row >= getRowSize() || col < 0 || col >= getColSize()) {
             return;
         }
         if (isOpenedCell(row, col)) {
@@ -72,7 +72,7 @@ public class GameBoard {
 
     public void initializeGame() {
         int rowSize = getRowSize();
-        int colSize = getColumnSize();
+        int colSize = getColSize();
 
         for (int row = 0; row < rowSize; row++) {
             for (int col = 0; col < colSize; col++) {
@@ -114,13 +114,13 @@ public class GameBoard {
         return board.length;
     }
 
-    public int getColumnSize() {
+    public int getColSize() {
         return board[0].length;
     }
 
     public int countNearbyLandMines(int row, int col) {
         int rowSize = getRowSize();
-        int colSize = getColumnSize();
+        int colSize = getColSize();
         int count = 0;
 
         if (row - 1 >= 0 && col - 1 >= 0 && isLandMineCell(row - 1, col - 1)) {
