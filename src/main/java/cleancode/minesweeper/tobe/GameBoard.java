@@ -97,11 +97,15 @@ public class GameBoard {
 
     private void initializeEmptyCells(CellPositions cellPositions) {
         List<CellPosition> allPositions = cellPositions.getPositions();
-        updateCellsAt(allPositions, new EmptyCell());
+        for (CellPosition position : allPositions) {
+            updateCellAt(position, new EmptyCell());
+        }
     }
 
     private void initializeLandMineCells(List<CellPosition> landMinePositions) {
-        updateCellsAt(landMinePositions, new LandMineCell());
+        for (CellPosition position : landMinePositions) {
+            updateCellAt(position, new LandMineCell());
+        }
     }
 
     private void initializeNumberCells(List<CellPosition> numberPositionCandidates) {
@@ -110,12 +114,6 @@ public class GameBoard {
             if (count != 0) {
                 updateCellAt(candidatePosition, new NumberCell(count));
             }
-        }
-    }
-
-    private void updateCellsAt(List<CellPosition> allPositions, Cell cell) {
-        for (CellPosition position : allPositions) {
-            updateCellAt(position, cell);
         }
     }
 
