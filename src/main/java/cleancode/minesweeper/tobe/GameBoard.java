@@ -1,16 +1,12 @@
 package cleancode.minesweeper.tobe;
 
-import cleancode.minesweeper.tobe.cell.Cell;
-import cleancode.minesweeper.tobe.cell.EmptyCell;
-import cleancode.minesweeper.tobe.cell.LandMineCell;
-import cleancode.minesweeper.tobe.cell.NumberCell;
+import cleancode.minesweeper.tobe.cell.*;
 import cleancode.minesweeper.tobe.gamelevel.GameLevel;
 import cleancode.minesweeper.tobe.position.CellPosition;
+import cleancode.minesweeper.tobe.position.CellPositions;
 import cleancode.minesweeper.tobe.position.RelativePosition;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class GameBoard {
 
@@ -69,9 +65,13 @@ public class GameBoard {
     }
 
     public boolean isAllCellChecked() {
-        return Arrays.stream(board) // Stream<String[]>
-                .flatMap(Arrays::stream) // Stream<String> -> 이중 배열을 평탄화 해서 1차원 배열로 만들어줌
-                .allMatch(Cell::isChecked); // 모든 셀이 체크되었는지 확인
+        // Cell을 가공하던 책임이 1급 컬렉션인 Cells로 이동
+        Cells cells = Cells.from(board);
+        return cells.isAllChecked();
+
+//        return Arrays.stream(board) // Stream<String[]>
+//                .flatMap(Arrays::stream) // Stream<String> -> 이중 배열을 평탄화 해서 1차원 배열로 만들어줌
+//                .allMatch(Cell::isChecked); // 모든 셀이 체크되었는지 확인
     }
 
     public boolean isInvalidCellPosition(CellPosition cellPosition) {
@@ -83,38 +83,44 @@ public class GameBoard {
     }
 
     public void initializeGame() {
-        int rowSize = getRowSize();
-        int colSize = getColSize();
-
-        for (int row = 0; row < rowSize; row++) {
-            for (int col = 0; col < colSize; col++) {
-                board[row][col] = new EmptyCell(); // 초기 할당은 빈 셀로
-            }
-        }
+        CellPositions cellPositions = CellPositions.from(board);
+        initializeEmptyCells(cellPositions);
 
         // 지뢰 랜덤 생성
-        for (int i = 0; i < landMineCount; i++) {
-            int landMineCol = new Random().nextInt(colSize);
-            int landMineRow = new Random().nextInt(rowSize);
-            LandMineCell landMineCell = new LandMineCell();
-            board[landMineRow][landMineCol] = landMineCell;
-        }
+        List<CellPosition> landMinePositions = cellPositions.extractRandomPositions(landMineCount);
+        initializeLandMineCells(landMinePositions);
 
         // 지뢰 찾기 (선택된 곳 주변 8칸에(선택된 영역 주변을 둥글게 감싼 영역) 지뢰가 있는지 확인)
-        for (int row = 0; row < rowSize; row++) {
-            for (int col = 0; col < colSize; col++) {
-                CellPosition cellPosition = CellPosition.of(row, col);
+        List<CellPosition> numberPositionCandidates = cellPositions.subtract(landMinePositions);
+        initializeNumberCells(numberPositionCandidates);
+    }
 
-                if (isLandMineCellAt(cellPosition)) {
-                    continue;
-                }
-                int count = countNearbyLandMines(cellPosition);
-                if (count == 0) {
-                    continue;
-                }
-                board[row][col] = new NumberCell(count);
+    private void initializeEmptyCells(CellPositions cellPositions) {
+        List<CellPosition> allPositions = cellPositions.getPositions();
+        updateCellsAt(allPositions, new EmptyCell());
+    }
+
+    private void initializeLandMineCells(List<CellPosition> landMinePositions) {
+        updateCellsAt(landMinePositions, new LandMineCell());
+    }
+
+    private void initializeNumberCells(List<CellPosition> numberPositionCandidates) {
+        for (CellPosition candidatePosition : numberPositionCandidates) {
+            int count = countNearbyLandMines(candidatePosition);
+            if (count != 0) {
+                updateCellAt(candidatePosition, new NumberCell(count));
             }
         }
+    }
+
+    private void updateCellsAt(List<CellPosition> allPositions, Cell cell) {
+        for (CellPosition position : allPositions) {
+            updateCellAt(position, cell);
+        }
+    }
+
+    private void updateCellAt(CellPosition position, Cell cell) {
+        board[position.getRowIndex()][position.getColIndex()] = cell;
     }
 
     public String getSign(CellPosition cellPosition) {
