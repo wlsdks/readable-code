@@ -7,7 +7,7 @@ public class NumberCellSignProvider implements CellSignProvidable {
 
     @Override
     public boolean supports(CellSnapshot cellSnapshot) {
-        return cellSnapshot.isSameStatus(CellSnapshotStatus.LAND_MINE);
+        return cellSnapshot.isSameStatus(CellSnapshotStatus.NUMBER);
     }
 
     @Override
